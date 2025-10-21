@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Workforce Risk Assessment Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .top-nav {
+            background: linear-gradient(135deg, #5e3c91 0%, #9b59b6 50%, #d4a5d8 100%);
+            color: white;
+            padding: 15px 40px;
+            box-shadow: 0 4px 12px rgba(94, 60, 145, 0.3);
+        }
+        
+        .nav-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
+        .nav-title { text-align: center; }
+        .nav-title h1 { font-size: 24px; margin-bottom: 5px; }
+        .nav-title p { font-size: 13px; opacity: 0.95; }
+        .nav-actions { display: flex; gap: 15px; position: absolute; right: 40px; }
+        
+        .add-event-btn { padding: 10px 25px; background: linear-gradient(135deg, #9b59b6 0%, #5e3c91 100%); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
+        .add-event-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3); }
+
+        .nav-btn { padding: 10px 20px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+        .nav-btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+        
+        .main-container { max-width: 1400px; margin: 0 auto; padding: 15px 40px; }
+        
+        .alert-banner { background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border: 2px solid #f39c12; border-radius: 12px; padding: 15px 25px; margin-bottom: 15px; display: none; align-items: center; gap: 20px; box-shadow: 0 4px 12px rgba(243, 156, 18, 0.2); }
+        .alert-banner.show { display: flex; }
+        .alert-icon { font-size: 40px; flex-shrink: 0; }
+        .alert-content h2 { color: #856404; font-size: 18px; margin-bottom: 5px; }
+        .alert-content p { color: #856404; font-size: 14px; line-height: 1.5; }
+        
+        .content-grid { display: grid; grid-template-columns: 1fr 400px; gap: 15px; margin-bottom: 15px; align-items: stretch; }
+        
+        .assessment-panel { background: white; border-radius: 15px; padding: 8px 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; }
+        .panel-header h2 { color: #2c3e50; font-size: 22px; }
+        .form-section { margin-bottom: 6px; }
+        .section-title { font-size: 17px; color: #34495e; margin-bottom: 10px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .section-icon { font-size: 22px; }
+        .input-label { display: block; font-size: 13px; color: #7f8c8d; margin-bottom: 8px; font-weight: 500; }
+        .option-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .option-button { padding: 10px 8px; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; text-align: center; font-size: 12px; color: #2c3e50; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .option-button:hover { border-color: #9b59b6; background: #f5f0f9; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(155, 89, 182, 0.2); }
+        .option-button.selected { background: linear-gradient(135deg, #9b59b6 0%, #5e3c91 100%); color: white; border-color: #9b59b6; box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4); }
+        .option-button small { font-size: 10px; font-weight: normal; opacity: 0.9; line-height: 1.3; color: #555; }
+        .option-button.selected small { color: white; }
+        .option-icon { font-size: 22px; }
+        
+        .age-input-container { display: flex; align-items: center; gap: 15px; }
+        .age-input-container input[type="range"] { flex-grow: 1; }
+        .age-input-container input[type="number"] { width: 70px; padding: 8px; border-radius: 6px; border: 2px solid #e0e0e0; text-align: center; font-size: 16px; font-weight: 600; }
+        .age-input-container input[type="number"]:focus { outline: none; border-color: #9b59b6; }
+
+        .employee-input-container { display: flex; flex-direction: column; gap: 10px; }
+        .custom-employee-input { width: 100%; padding: 8px; border-radius: 6px; border: 2px solid #e0e0e0; text-align: center; font-size: 16px; font-weight: 600; }
+        .custom-employee-input:focus { outline: none; border-color: #9b59b6; }
+        .custom-employee-input::placeholder { font-weight: normal; font-size: 14px; }
+
+        .analyze-section { text-align: center; margin-top: 6x; padding-top: 6px; border-top: 2px solid #f0f0f0; }
+        
+        .analyze-btn { 
+            position: relative;
+            padding: 16px 45px 16px 60px; 
+            background: linear-gradient(135deg, #6b46a3 0%, #4a2c6d 100%); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 0 6px 25px rgba(74, 44, 109, 0.5);
+            transition: all 0.3s;
+        }
+
+        .analyze-btn::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: #ab5de8;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        .analyze-btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 30px rgba(74, 44, 109, 0.6);
+        }
+
+        @keyframes pulse-dot {
+            0% { box-shadow: 0 0 0 0 rgba(171, 93, 232, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(171, 93, 232, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(171, 93, 232, 0); }
+        }
+        
+        .chat-panel { background: white; border-radius: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { background: linear-gradient(135deg, #5e3c91 0%, #9b59b6 100%); color: white; padding: 15px; border-radius: 25px 25px 0 0; text-align: center; }
+        .chat-header h3 { font-size: 18px; margin-bottom: 5px; }
+        .chat-header p { font-size: 12px; opacity: 0.95; }
+        
+        .quick-actions { padding: 10px; background: #f8f9fa; border-bottom: 2px solid #e0e0e0; display: flex; flex-wrap: wrap; gap: 8px; }
+        .quick-btn { padding: 8px 12px; background: #6b46a3; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all 0.2s; font-weight: 500; }
+        .quick-btn:hover { background: #5e3c91; transform: translateY(-1px); }
+        
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; background: #fafbfc; }
+        .message { margin-bottom: 15px; display: flex; animation: messageSlide 0.3s ease; }
+        @keyframes messageSlide { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .message.user { justify-content: flex-end; }
+        .message-bubble { max-width: 75%; padding: 10px 15px; border-radius: 18px; line-height: 1.5; font-size: 13px; }
+        .message.user .message-bubble { background: linear-gradient(135deg, #9b59b6 0%, #5e3c91 100%); color: white; border-bottom-right-radius: 4px; }
+        .message.assistant .message-bubble { background: white; color: #2c3e50; border: 1px solid #e0e0e0; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .message.system .message-bubble { background: #fff3cd; color: #856404; border: 1px solid #f39c12; max-width: 85%; font-size: 12px; }
+        
+        .chat-input-area { padding: 10px; background: white; border-top: 2px solid #e0e0e0; display: flex; gap: 10px; }
+        .chat-input-area input { flex: 1; padding: 12px 20px; border: 2px solid #e0e0e0; border-radius: 50px; font-size: 14px; outline: none; transition: border-color 0.3s; }
+        .chat-input-area input:focus { border-color: #9b59b6; }
+        .send-btn { padding: 12px 25px; background: linear-gradient(135deg, #9b59b6 0%, #5e3c91 100%); color: white; border: none; border-radius: 50px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s; }
+        .send-btn:hover { transform: scale(1.05); }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .results-container { display: none; }
+        .results-container.show { display: block; }
+        .risk-dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
+        .risk-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #9b59b6; transition: transform 0.3s; }
+        .risk-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(155, 89, 182, 0.2); }
+        .risk-card-icon { font-size: 36px; margin-bottom: 8px; }
+        .risk-card-value { font-size: 30px; font-weight: bold; color: #9b59b6; margin-bottom: 5px; }
+        .risk-card-label { font-size: 11px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        
+        .roi-analysis { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 15px; }
+        .roi-header { text-align: center; margin-bottom: 15px; }
+        .roi-header h2 { font-size: 22px; color: #2c3e50; margin-bottom: 8px; }
+        .roi-header p { color: #7f8c8d; font-size: 13px; }
+        .roi-comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .roi-option { padding: 15px; border-radius: 12px; border: 2px solid #e0e0e0; }
+        .roi-option.replace { background: linear-gradient(135deg, #ffe6e6 0%, #ffd6d6 100%); border-color: #e74c3c; }
+        .roi-option.retain { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-color: #27ae60; }
+        .roi-option h3 { font-size: 17px; margin-bottom: 15px; color: #2c3e50; }
+        .cost-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.1); font-size: 13px; }
+        .cost-line span:first-child { color: #555; }
+        .cost-line span:last-child { font-weight: bold; color: #2c3e50; }
+        .roi-total { display: flex; justify-content: space-between; padding: 12px 0; margin-top: 10px; border-top: 2px solid rgba(0,0,0,0.2); font-size: 15px; font-weight: bold; }
+        .savings-highlight { background: linear-gradient(135deg, #6b46a3 0%, #4a2c6d 100%); color: white; padding: 15px; border-radius: 15px; text-align: center; position: relative; }
+        .savings-highlight h3 { font-size: 16px; margin-bottom: 8px; opacity: 0.95; }
+        .savings-amount { font-size: 38px; font-weight: bold; margin-bottom: 5px; }
+        .savings-roi { font-size: 14px; opacity: 0.95; margin-bottom: 8px; }
+        
+        .scroll-indicator {
+            text-align: center;
+            padding: 12px;
+            margin: 15px -20px -20px -20px; 
+            background: linear-gradient(135deg, #6b46a3 0%, #4a2c6d 100%);
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 0 0 15px 15px;
+            cursor: pointer;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(0.99); }
+        }
+
+        .strategy-sandbox { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 15px; }
+        .sandbox-header { text-align: center; margin-bottom: 20px; }
+        .sandbox-header h2 { font-size: 22px; color: #2c3e50; margin-bottom: 8px; }
+        .sandbox-header p { color: #7f8c8d; font-size: 13px; }
+        .sandbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+        .sandbox-control { margin-bottom: 20px; }
+        .sandbox-control label { font-size: 17px; font-weight: 600; color: #34495e; margin-bottom: 15px; display: block; }
+        .sandbox-results { background: linear-gradient(135deg, #f5f0f9 0%, #e8eaf6 100%); padding: 20px; border-radius: 12px; border: 2px solid #d1c4e9; display: none; }
+        .sandbox-results.show { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .sandbox-results h3 { font-size: 18px; color: #5e3c91; margin-bottom: 15px; text-align: center; }
+        .result-metric { display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 10px 0; border-bottom: 1px solid #d1c4e9; }
+        .result-metric:last-child { border-bottom: none; }
+        .result-metric span:first-child { font-weight: 500; color: #333; }
+        .result-value { font-weight: bold; font-size: 15px; text-align: right; }
+        .change-indicator { display: block; font-size: 12px; font-weight: 500; }
+        .change-indicator.positive { color: #27ae60; }
+        .change-indicator.negative { color: #e74c3c; }
+        .change-indicator.neutral { color: #7f8c8d; }
+        #investmentValue { font-weight: bold; color: #9b59b6; }
+        
+        .actions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+        .action-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 5px solid #9b59b6; transition: transform 0.3s; }
+        .action-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(155, 89, 182, 0.2); }
+        .action-number { display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; background: linear-gradient(135deg, #9b59b6 0%, #5e3c91 100%); color: white; border-radius: 50%; font-weight: bold; margin-bottom: 10px; }
+        .action-card h4 { font-size: 16px; color: #2c3e50; margin-bottom: 10px; }
+        .action-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+        .action-metric { text-align: center; padding: 8px; background: #f8f9fa; border-radius: 8px; }
+        .action-metric-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; margin-bottom: 4px; }
+        .action-metric-value { font-size: 14px; font-weight: bold; color: #9b59b6; }
+        .action-description { font-size: 12px; color: #555; line-height: 1.6; }
+        
+        .download-section { text-align: center; padding: 25px; background: linear-gradient(135deg, #4a2c6d 0%, #2e1a47 100%); color: white; border-radius: 15px; box-shadow: 0 8px 30px rgba(46, 26, 71, 0.5); }
+        .download-btn { padding: 14px 35px; background: linear-gradient(135deg, #ab5de8 0%, #9b59b6 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 6px 25px rgba(155, 89, 182, 0.4); transition: all 0.3s; }
+        .download-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(171, 93, 232, 0.5); }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 900px; max-height: 85vh; overflow-y: auto; position: relative; animation: modalAppear 0.3s ease; }
+        @keyframes modalAppear { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .modal-close { position: absolute; top: 20px; right: 25px; font-size: 32px; color: #7f8c8d; cursor: pointer; border: none; background: none; }
+        .modal-close:hover { color: #2c3e50; }
+        .daily-modal .modal-content { max-width: 1200px; }
+        .quick-actions-modal .modal-content { max-width: 800px; }
+        .email-setup-modal .modal-content { max-width: 600px; padding: 25px 30px; }
+        .tracker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .tracker-card { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px; border-radius: 10px; border-left: 4px solid #9b59b6; }
+        .tracker-card h4 { font-size: 14px; color: #2c3e50; margin-bottom: 10px; text-transform: uppercase; font-weight: 600; }
+        .tracker-card p { font-size: 13px; color: #5a6c7d; line-height: 1.6; }
+        
+        .quick-action-item { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #9b59b6; }
+        .quick-action-item button { padding: 8px 20px; background: linear-gradient(135deg, #9b59b6 0%, #5e3c91 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: transform 0.2s; }
+        .quick-action-item button:hover { transform: scale(1.05); }
+
+        .email-input-group { margin: 15px 0; }
+        .email-input-group label { display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 600; }
+        .email-input-group input[type="email"], .email-input-group select, .email-input-group textarea, .email-input-group input[type="text"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; background: #fff; }
+        .email-input-group input:focus, .email-input-group select:focus, .email-input-group textarea:focus { outline: none; border-color: #9b59b6; }
+        
+        .checkbox-item { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 15px; padding: 5px 0; }
+        .checkbox-item label { font-weight: normal; cursor: pointer; order: 2;}
+        .checkbox-item input { order: 1; }
+
+        #methodologyOutput { font-size: 14px; white-space: normal; }
+        .methodology-content { padding: 10px; line-height: 1.6; }
+        .methodology-section { margin-bottom: 25px; }
+        .methodology-section h3 { font-size: 20px; color: #34495e; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; margin-bottom: 15px; }
+        .methodology-section p { margin-bottom: 15px; color: #555; }
+        .methodology-section ul { list-style-position: inside; padding-left: 5px; }
+        .methodology-section li { margin-bottom: 10px; }
+        .methodology-source { font-style: italic; font-size: 13px; color: #7f8c8d; margin-top: 10px; }
+
+        #reportOutput { 
+            font-size: 13px; 
+            line-height: 1.6; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #e0e0e0;
+            max-height: 60vh;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            color: #2c3e50;
+        }
+        #reportOutput::-webkit-scrollbar { width: 8px; }
+        #reportOutput::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        #reportOutput::-webkit-scrollbar-thumb { background: #9b59b6; border-radius: 4px; }
+        #reportOutput::-webkit-scrollbar-thumb:hover { background: #8e44ad; }
+
+        .report-modal-actions { text-align: center; margin-top: 20px; }
+        .copy-report-btn { padding: 12px 30px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.3s; font-size: 16px; }
+        .copy-report-btn:hover { background: #2ecc71; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #d1c4e9; border-radius: 4px; }
+        input[type=range]::-webkit-slider-thumb { height: 20px; width: 20px; border-radius: 50%; background: #5e3c91; cursor: pointer; -webkit-appearance: none; margin-top: -6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        input[type=range]::-moz-range-track { width: 100%; height: 8px; cursor: pointer; background: #d1c4e9; border-radius: 4px; }
+        .modal-header h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        input[type=range]::-moz-range-thumb { height: 20px; width: 20px; border-radius: 50%; background: #5e3c91; cursor: pointer; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        input[type=range]::-ms-track { width: 100%; height: 8px; cursor: pointer; background: transparent; border-color: transparent; color: transparent; }
+        input[type=range]::-ms-fill-lower { background: #d1c4e9; border-radius: 4px; }
+        input[type=range]::-ms-fill-upper { background: #d1c4e9; border-radius: 4px; }
+        input[type=range]::-ms-thumb { height: 20px; width: 20px; border-radius: 50%; background: #5e3c91; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <div class="nav-content">
+            <div class="nav-title">
+                <h1>🎯 HR Workforce Risk Assessment Tool</h1>
+                <p>Protect your business from critical talent loss and knowledge gaps</p>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" onclick="showMethodology()">📊 Methodology</button>
+                <button class="nav-btn" onclick="resetTool()">🔄 Reset</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="alert-banner" id="alertBanner">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-content">
+                <h2>Critical Business Risk Detected</h2>
+                <p id="alertText">High exposure to talent loss identified. Immediate action recommended.</p>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="assessment-panel">
+                <div class="panel-header">
+                    <h2>Step 1: Business Assessment</h2>
+                </div>
+                
+                <div class="form-section">
+                    <div class="section-title"><span class="section-icon">🏢</span> Industry Type</div>
+                    <div class="input-label">Select your organization's primary industry</div>
+                    <div class="option-grid" id="industryGrid" style="grid-template-columns: repeat(3, 1fr);">
+                        <button class="option-button selected" data-value="manufacturing"> <span class="option-icon">🏭</span> <span>Manufacturing</span> </button>
+                        <button class="option-button" data-value="services"> <span class="option-icon">💼</span> <span>Services</span> </button>
+                        <button class="option-button" data-value="healthcare"> <span class="option-icon">🏥</span> <span>Healthcare</span> </button>
+                        <button class="option-button" data-value="technology"> <span class="option-icon">💻</span> <span>Technology</span> </button>
+                        <button class="option-button" data-value="construction"> <span class="option-icon">🏗️</span> <span>Construction</span> </button>
+                        <button class="option-button" data-value="finance"> <span class="option-icon">💰</span> <span>Finance</span> </button>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <div class="section-title"><span class="section-icon">📊</span> Average Employee Age</div>
+                    <div class="input-label">Use the slider or type to enter the average age (35-50)</div>
+                    <div class="age-input-container">
+                        <input type="range" id="averageAgeSlider" min="35" max="50" value="45" step="1">
+                        <input type="number" id="averageAgeInput" min="35" max="50" value="45">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <div class="section-title"><span class="section-icon">👥</span> Total Employees</div>
+                    <div class="input-label">Click a button or type a custom amount below.</div>
+                     <div class="employee-input-container">
+                        <div class="option-grid" id="employeesGrid">
+                            <button class="option-button" data-value="50">50</button> 
+                            <button class="option-button selected" data-value="100">100</button> 
+                            <button class="option-button" data-value="200">200</button> 
+                            <button class="option-button" data-value="400">400</button> 
+                        </div>
+                        <input type="number" id="customEmployeesInput" class="custom-employee-input" placeholder="Or enter a different number">
+                    </div>
+                </div>
+                
+                <div class="analyze-section"> <button class="analyze-btn" id="analyzeBtn">Analyze Business Risk</button> </div>
+            </div>
+            
+            <div class="chat-panel">
+                <div class="chat-header"> <h3>🤖 Business Continuity AI Assistant</h3> <p>Get instant insights on workforce risks and retention strategies</p> </div>
+                <div class="quick-actions">
+                    <button class="quick-btn" data-question="What does my risk level mean?">Explain risk</button>
+                    <button class="quick-btn" data-question="How are replacement costs calculated?">Replacement costs</button>
+                    <button class="quick-btn" data-question="Suggest high-ROI retention strategies.">Best ROI strategies</button>
+                    <button class="quick-btn" data-question="How do I start a knowledge transfer program?">Knowledge transfer</button>
+                    <button class="quick-btn" data-question="What are key metrics to track for success?">Success metrics</button>
+                </div>
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="chat-input-area"> <input type="text" id="chatInput" placeholder="Ask about risks, costs, ROI..."> <button class="send-btn" id="sendChatBtn">Send</button> </div>
+            </div>
+        </div>
+        
+        <div class="results-container" id="resultsContainer">
+            <div class="risk-dashboard">
+                <div class="risk-card"> <div class="risk-card-icon">⚠️</div> <div class="risk-card-value" id="riskLevel">--</div> <div class="risk-card-label">Risk Level</div> </div>
+                <div class="risk-card"> <div class="risk-card-icon">👔</div> <div class="risk-card-value" id="criticalSkills">--</div> <div class="risk-card-label">Critical Skills at Risk</div> </div>
+                <div class="risk-card"> <div class="risk-card-icon">📅</div> <div class="risk-card-value" id="retiringEmployees">--</div> <div class="risk-card-label">Employees Retiring Soon</div> </div>
+                <div class="risk-card"> <div class="risk-card-icon">💰</div> <div class="risk-card-value" id="replacementCost">--</div> <div class="risk-card-label">Replacement Cost</div> </div>
+            </div>
+            
+            <div class="roi-analysis">
+                <div class="roi-header"> <h2>💰 Cost-Benefit Analysis: Retention vs. Replacement</h2> <p>Financial impact of different workforce strategies based on your assessment.</p> </div>
+                <div class="roi-comparison-grid">
+                    <div class="roi-option replace">
+                        <h3>❌ Current Approach (Replace)</h3>
+                        <div class="cost-line"><span>Recruitment Costs</span><span id="replaceRecruitment">--</span></div>
+                        <div class="cost-line"><span>Onboarding & Training</span><span id="replaceTraining">--</span></div>
+                        <div class="cost-line"><span>Lost Productivity</span><span id="replaceProductivity">--</span></div>
+                        <div class="roi-total"><span>Total Cost</span><span id="replaceTotal">--</span></div>
+                    </div>
+                    <div class="roi-option retain">
+                        <h3>✅ Proactive Approach (Retain)</h3>
+                        <div class="cost-line"><span>Upskilling & Training</span><span id="retainTraining">--</span></div>
+                        <div class="cost-line"><span>Phased Retirement Programs</span><span id="retainPrograms">--</span></div>
+                        <div class="cost-line"><span>Knowledge Transfer Tools</span><span id="retainTools">--</span></div>
+                        <div class="roi-total"><span>Total Investment</span><span id="retainTotal">--</span></div>
+                    </div>
+                </div>
+                <div class="savings-highlight"> <h3>Potential Net Savings with Proactive Retention</h3> <div class="savings-amount" id="netSavings">--</div> <div class="savings-roi" id="roiPercentage">--</div></div>
+                <div class="scroll-indicator" onclick="document.querySelector('.strategy-sandbox').scrollIntoView({behavior: 'smooth'})">
+                    ⬇️ Scroll Down for Step 2: Build a Better Strategy ⬇️
+                </div>
+            </div>
+            
+            <div class="strategy-sandbox">
+                <div class="sandbox-header"> <h2>Step 2: Build a Better Strategy</h2> <p>Simulate the impact of strategic investments to find the optimal plan for your business.</p> </div>
+                <div class="sandbox-grid">
+                    <div class="sandbox-controls">
+                        <div class="sandbox-control"> <label for="investmentSlider">Increase Retention & Upskilling Budget by: <span id="investmentValue">0%</span></label> <input type="range" id="investmentSlider" min="0" max="100" value="0" step="5"> </div>
+                        <div class="sandbox-control">
+                            <label>Knowledge Transfer Program Implementation</label>
+                            <div class="option-grid" id="ktProgramGrid" style="grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                                <button class="option-button selected" data-value="none"> <span>None</span> <small>No formal program.</small> </button>
+                                <button class="option-button" data-value="basic"> <span>Basic</span> <small>Mentorship, exit interviews & checklists.</small> </button>
+                                <button class="option-button" data-value="advanced"> <span>Advanced</span> <small>Job shadowing, digital playbooks & paid knowledge transfer.</small> </button>
+                            </div>
+                        </div>
+                        <button class="analyze-btn" id="simulateBtn" style="width: 100%; margin-top: 20px; animation: none;">🔬 Simulate Impact</button>
+                    </div>
+                    <div class="sandbox-results" id="sandboxResults">
+                        <h3>Projected Impact of Your Strategy</h3>
+                        <div class="result-metric"> <span>Risk Level</span> <div class="result-value" id="projectedRisk">--</div> </div>
+                        <div class="result-metric"> <span>Est. Replacement Cost</span> <div class="result-value" id="projectedCost">--</div> </div>
+                        <div class="result-metric"> <span>Critical Employee Retention</span> <div class="result-value" id="projectedRetention">--</div> </div>
+                        <div class="result-metric"> <span>New Strategy ROI</span> <div class="result-value" id="projectedROI">--</div> </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions-grid">
+                <div class="action-card">
+                    <div class="action-number">1</div> <h4>📊 View Daily Dashboard</h4>
+                    <div class="action-metrics"> <div class="action-metric"><div class="action-metric-label">Updates</div><div class="action-metric-value">Auto</div></div> <div class="action-metric"><div class="action-metric-label">Time</div><div class="action-metric-value">2min</div></div> <div class="action-metric"><div class="action-metric-label">Use</div><div class="action-metric-value">Daily</div></div> </div>
+                    <p class="action-description">Check daily alerts on retirements, salary benchmarks, and turnover spikes. Takes 2 minutes each morning.</p>
+                    <button class="add-event-btn" id="dailyDashboardBtn" style="width: 100%; margin-top: 15px;">Open Daily Dashboard</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-number">2</div> <h4>💼 Quick Actions</h4>
+                    <div class="action-metrics"> <div class="action-metric"><div class="action-metric-label">Tasks</div><div class="action-metric-value">5+</div></div> <div class="action-metric"><div class="action-metric-label">Time</div><div class="action-metric-value">1min</div></div> <div class="action-metric"><div class="action-metric-label">Use</div><div class="action-metric-value">Weekly</div></div> </div>
+                    <p class="action-description">One-click actions: approve retention bonus, schedule succession meeting, export report, flag at-risk employee.</p>
+                    <button class="add-event-btn" id="quickActionsBtn" style="width: 100%; margin-top: 15px;">Show Quick Actions</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-number">3</div> <h4>📧 Email Integration</h4>
+                    <div class="action-metrics"> <div class="action-metric"><div class="action-metric-label">Alerts</div><div class="action-metric-value">Auto</div></div> <div class="action-metric"><div class="action-metric-label">Setup</div><div class="action-metric-value">5min</div></div> <div class="action-metric"><div class="action-metric-label">Type</div><div class="action-metric-value">Smart</div></div> </div>
+                    <p class="action-description">Get alerts in your inbox: "3 employees retiring next quarter - schedule meetings now" with calendar links.</p>
+                    <button class="add-event-btn" id="setupAlertsBtn" style="width: 100%; margin-top: 15px;">Setup Alerts</button>
+                </div>
+            </div>
+            
+            <div class="download-section"> <h2 style="margin-bottom: 20px; font-size: 26px;">Finalize Your Strategy</h2> <button class="download-btn" id="showReportBtn">📄 Download Full Risk & ROI Report</button> </div>
+        </div>
+    </div>
+
+    <div class="modal" id="methodologyModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('methodologyModal')">&times;</button>
+            <h2>📊 Methodology</h2>
+            <div class="methodology-content" id="methodologyOutput"></div>
+        </div>
+    </div>
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('reportModal')">&times;</button>
+            <h2>📄 Risk & ROI Report</h2>
+            <pre id="reportOutput"></pre>
+            <div class="report-modal-actions">
+                <button class="copy-report-btn" id="copyReportBtn" style="margin-right: 10px; background: #3498db;">📋 Copy to Clipboard</button>
+                <button class="copy-report-btn" id="downloadReportBtn">📥 Download as Text File</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal daily-modal" id="dailyDashboardModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('dailyDashboardModal')">&times;</button>
+            <h2>📅 Today's Action Items Dashboard</h2>
+            <p style="color: #666; margin-bottom: 20px;">Updated automatically every morning at 8:00 AM</p>
+            <div class="tracker-grid" style="margin-top: 20px;">
+                <div class="tracker-card"> <h4>⚠️ Urgent: This Week</h4> <p id="modalUrgentAlerts">Run an analysis to see live alerts.</p> </div>
+                <div class="tracker-card"> <h4>💰 Budget Alert</h4> <p id="modalBudgetAlerts">Run an analysis to see live alerts.</p> </div>
+                <div class="tracker-card"> <h4>📋 Action Required</h4> <p id="modalActionAlerts">Run an analysis to see live alerts.</p> </div>
+            </div>
+            <button class="add-event-btn" id="modalRefreshBtn" style="width: 100%; margin-top: 20px;">🔄 Refresh Data</button>
+        </div>
+    </div>
+    
+    <div class="modal quick-actions-modal" id="quickActionsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('quickActionsModal')">&times;</button>
+            <h2>💼 Proactive Weekly Actions</h2>
+            <p style="color: #666; margin-bottom: 20px;">Actions to support and retain experienced employees.</p>
+            
+            <div class="quick-action-item">
+                <span>🗓️ Initiate Phased Retirement Plan</span>
+                <button onclick="showPhasedRetirementModal()">Plan</button>
+            </div>
+            <div class="quick-action-item">
+                <span>🧠 Capture Institutional Knowledge</span>
+                <button onclick="showKnowledgeCaptureModal()">Capture</button>
+            </div>
+            <div class="quick-action-item">
+                <span>🧘 Request Ergonomic/Wellness Check</span>
+                <button onclick="showWellnessCheckModal()">Request</button>
+            </div>
+            <div class="quick-action-item">
+                <span>🤝 Schedule Mentorship Session</span>
+                <button onclick="showMentorshipModal()">Schedule</button>
+            </div>
+            <div class="quick-action-item">
+                <span>🎓 Nominate for Upskilling Course</span>
+                <button onclick="showUpskillingModal()">Nominate</button>
+            </div>
+            <div class="quick-action-item">
+                <span>📋 Initiate Flexible Work Discussion</span>
+                <button onclick="showFlexWorkModal()">Initiate</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal email-setup-modal" id="emailSetupModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('emailSetupModal')">&times;</button>
+            <h2>📧 Setup Email Alerts</h2>
+            <p style="color: #666; margin-bottom: 15px;">Receive daily workforce risk alerts directly in your inbox</p>
+            <div class="email-input-group"> <label>Your Email Address</label> <input type="email" id="alertEmail" placeholder="youremail@company.com"> </div>
+            <div class="email-input-group">
+                <label>Alert Frequency</label>
+                <select id="alertFrequency">
+                    <option value="daily">Daily Digest (8:00 AM)</option>
+                    <option value="weekly">Weekly Summary (Monday 8:00 AM)</option>
+                    <option value="instant">Instant (Critical Events Only)</option>
+                </select>
+            </div>
+            <div class="email-input-group">
+                <label>Alert Types</label>
+                <div class="checkbox-item"><label for="type-retire">Retirement Announcements</label><input type="checkbox" id="type-retire" checked></div>
+                <div class="checkbox-item"><label for="type-salary">Salary Benchmark Alerts</label><input type="checkbox" id="type-salary" checked></div>
+                <div class="checkbox-item"><label for="type-turnover">Turnover Pattern Warnings</label><input type="checkbox" id="type-turnover" checked></div>
+                <div class="checkbox-item"><label for="type-succession">Succession Plan Updates</label><input type="checkbox" id="type-succession"></div>
+                <div class="checkbox-item"><label for="type-budget">Budget Impact Notifications</label><input type="checkbox" id="type-budget"></div>
+            </div>
+            <button class="add-event-btn" id="saveEmailBtn" style="width: 100%; margin-top: 15px;">💾 Save & Activate Alerts</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="mentorshipModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('mentorshipModal')">&times;</button>
+            <div id="mentorshipForm">
+                <h2>🤝 Schedule Mentorship Session</h2>
+                <p style="color: #666; margin-bottom: 20px;">This will simulate sending a pre-filled email to the participants.</p>
+                <div class="email-input-group">
+                    <label>Email Content</label>
+                    <textarea id="mentorshipEmailBody" rows="8" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+                </div>
+                <button class="add-event-btn" onclick="submitMentorshipForm()" style="width: 100%;">Send Mock Email</button>
+            </div>
+            <div id="mentorshipSuccess" style="display: none; text-align: center;">
+                <h2 style="color: #27ae60;">✅ Success!</h2>
+                <p>The mentorship invitation has been sent.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="upskillingModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('upskillingModal')">&times;</button>
+            <div id="upskillingForm">
+                <h2>🎓 Nominate for Upskilling Course</h2>
+                <div class="email-input-group">
+                    <label for="upskillEmployeeName">Employee Name</label>
+                    <input type="text" id="upskillEmployeeName" value="John Doe">
+                </div>
+                <div class="email-input-group">
+                    <label for="upskillCourseName">Course Name</label>
+                    <input type="text" id="upskillCourseName" value="AI for Project Managers">
+                </div>
+                <button class="add-event-btn" onclick="submitUpskillingForm()" style="width: 100%;">Submit Nomination</button>
+            </div>
+            <div id="upskillingSuccess" style="display: none; text-align: center;">
+                <h2 style="color: #27ae60;">✅ Nomination Sent!</h2>
+                <p id="upskillingSuccessText"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="flexWorkModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('flexWorkModal')">&times;</button>
+            <div id="flexWorkForm">
+                <h2>📋 Initiate Flexible Work Discussion</h2>
+                <div class="email-input-group">
+                    <label for="flexWorkEmployeeName">Employee Name</label>
+                    <input type="text" id="flexWorkEmployeeName" value="Maria Garcia">
+                </div>
+                <button class="add-event-btn" onclick="submitFlexWorkForm()" style="width: 100%;">Confirm & Notify HR</button>
+            </div>
+             <div id="flexWorkSuccess" style="display: none; text-align: center;">
+                <h2 style="color: #27ae60;">✅ Request Sent!</h2>
+                <p id="flexWorkSuccessText"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="phasedRetirementModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('phasedRetirementModal')">&times;</button>
+            <div id="phasedRetirementForm">
+                <h2>🗓️ Initiate Phased Retirement Plan</h2>
+                <div class="email-input-group">
+                    <label for="phasedEmployeeName">Employee Name</label>
+                    <input type="text" id="phasedEmployeeName" value="Susan Vance">
+                </div>
+                <div class="email-input-group">
+                    <label for="phasedTargetDate">Desired Target Retirement Date</label>
+                    <input type="text" id="phasedTargetDate" value="Q4 2026">
+                </div>
+                <button class="add-event-btn" onclick="submitPhasedRetirementForm()" style="width: 100%;">Confirm & Notify HR</button>
+            </div>
+            <div id="phasedRetirementSuccess" style="display: none; text-align: center;">
+                <h2 style="color: #27ae60;">✅ Success!</h2>
+                <p id="phasedRetirementSuccessText"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="knowledgeCaptureModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('knowledgeCaptureModal')">&times;</button>
+            <div id="knowledgeCaptureForm">
+                <h2>🧠 Capture Institutional Knowledge</h2>
+                <div class="email-input-group">
+                    <label for="knowledgeEmployeeName">Senior Employee Name</label>
+                    <input type="text" id="knowledgeEmployeeName" value="George Miller">
+                </div>
+                <div class="email-input-group">
+                    <label for="knowledgeTopic">Critical Knowledge Topic</label>
+                    <input type="text" id="knowledgeTopic" value="The legacy client invoicing system">
+                </div>
+                <button class="add-event-btn" onclick="submitKnowledgeCaptureForm()" style="width: 100%;">Schedule Session</button>
+            </div>
+             <div id="knowledgeCaptureSuccess" style="display: none; text-align: center;">
+                <h2 style="color: #27ae60;">✅ Session Scheduled!</h2>
+                <p>An invitation has been sent to schedule the knowledge capture session.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="wellnessCheckModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('wellnessCheckModal')">&times;</button>
+            <div id="wellnessCheckForm">
+                <h2>🧘 Request Ergonomic/Wellness Check</h2>
+                <div class="email-input-group">
+                    <label for="wellnessEmployeeName">Employee Name</label>
+                    <input type="text" id="wellnessEmployeeName" value="Linda Ray">
+                </div>
+                <p style="color: #666; font-size: 13px; text-align: center; margin: 15px 0;">This request will be sent confidentially and handled discreetly by the HR/Wellness department.</p>
+                <button class="add-event-btn" onclick="submitWellnessCheckForm()" style="width: 100%;">Submit Confidential Request</button>
+            </div>
+            <div id="wellnessCheckSuccess" style="display: none; text-align: center;">
+                <h2 style="color: #27ae60;">✅ Request Sent!</h2>
+                <p id="wellnessCheckSuccessText"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="analysisNeededModal">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <button class="modal-close" onclick="hideModal('analysisNeededModal')">&times;</button>
+            <h2>Analysis Required</h2>
+            <p style="margin: 15px 0;">Please run the 'Analyze Business Risk' in Step 1 before simulating a strategy.</p>
+        </div>
+    </div>
+
+<script>
+    // FIX 1: Corrected API URL
+    const API_URL = 'https://hilarious-treacle-5bd90a.netlify.app/.netlify/functions/chat';
+    const BASE_REPLACEMENT_COST_PER_EMPLOYEE = 15000;
+    const RETAIN_COST_MULTIPLIER = 0.20;
+    const INDUSTRY_RISK_MULTIPLIERS = { manufacturing: 4, services: 2, healthcare: 4, technology: 5, construction: 3, finance: 1 };
+    
+    const AGE_RISK_MULTIPLIERS = {
+        35: 1, 36: 1, 37: 2, 38: 2, 39: 3, 40: 3, 41: 3, 42: 3, 43: 4, 44: 4, 45: 4, 46: 4, 47: 5, 48: 5, 49: 5, 50: 5
+    };
+
+    const EMPLOYEE_SIZE_MULTIPLIERS = { 50: 1, 100: 2, 200: 3, 400: 4, 750: 4, 1000: 5 };
+    let currentAnalysisResults = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        ['industryGrid', 'ktProgramGrid'].forEach(gridId => {
+            const grid = document.getElementById(gridId);
+            if (grid) {
+                grid.addEventListener('click', (e) => {
+                    const button = e.target.closest('.option-button');
+                    if (button) {
+                        grid.querySelectorAll('.option-button').forEach(btn => btn.classList.remove('selected'));
+                        button.classList.add('selected');
+                    }
+                });
+            }
+        });
+
+        const employeesGrid = document.getElementById('employeesGrid');
+        const customEmployeesInput = document.getElementById('customEmployeesInput');
+
+        employeesGrid.addEventListener('click', (e) => {
+            const button = e.target.closest('.option-button');
+            if (button) {
+                employeesGrid.querySelectorAll('.option-button').forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                customEmployeesInput.value = '';
+            }
+        });
+
+        customEmployeesInput.addEventListener('input', () => {
+             employeesGrid.querySelectorAll('.option-button').forEach(btn => btn.classList.remove('selected'));
+        });
+
+        const ageSlider = document.getElementById('averageAgeSlider');
+        const ageInput = document.getElementById('averageAgeInput');
+        ageSlider.addEventListener('input', (e) => ageInput.value = e.target.value);
+        ageInput.addEventListener('input', (e) => {
+            if (e.target.value >= 35 && e.target.value <= 50) {
+                ageSlider.value = e.target.value;
+            }
+        });
+
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeBusinessRisk);
+        document.getElementById('sendChatBtn').addEventListener('click', sendMessage);
+        document.getElementById('chatInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+        document.querySelector('.quick-actions').addEventListener('click', (e) => { if (e.target.classList.contains('quick-btn')) { document.getElementById('chatInput').value = e.target.dataset.question; sendMessage(); } });
+        addMessage("Hello! I'm your Business Continuity AI Assistant. Use Step 1 to assess your risk, then use Step 2 to model a solution.", 'assistant');
+        document.getElementById('investmentSlider').addEventListener('input', (e) => { document.getElementById('investmentValue').textContent = `${e.target.value}%`; });
+        document.getElementById('simulateBtn').addEventListener('click', runSimulation);
+        
+        document.getElementById('dailyDashboardBtn').addEventListener('click', showDailyDashboard);
+        document.getElementById('quickActionsBtn').addEventListener('click', showQuickActions);
+        document.getElementById('setupAlertsBtn').addEventListener('click', showEmailSetup);
+        document.getElementById('saveEmailBtn').addEventListener('click', saveEmailSettings);
+        document.getElementById('modalRefreshBtn').addEventListener('click', () => {
+            simulateUpdate();
+        });
+
+        document.getElementById('showReportBtn').addEventListener('click', showReportModal);
+        document.getElementById('downloadReportBtn').addEventListener('click', downloadReport);
+        document.getElementById('copyReportBtn').addEventListener('click', copyReportToClipboard);
+    });
+    
+    // ================================================================
+    // POWER BI-COMPATIBLE MODAL FUNCTIONS FOR QUICK ACTIONS
+    // ================================================================
+
+    function showModal(modalId) {
+        document.getElementById(modalId).classList.add('show');
+    }
+
+    // --- Mentorship Action ---
+    function showMentorshipModal() {
+        const seniorEmployee = "David Lee (Senior Engineer)";
+        const juniorEmployee = "Sarah Chen (Junior Engineer)";
+        const emailBody = `Hi Sarah,\n\nI'd like to schedule a 30-minute mentorship session for you with ${seniorEmployee} next week to discuss the upcoming project architecture. His insights will be incredibly valuable.\n\nPlease coordinate with him to find a suitable time.\n\nBest regards,\n[Your Name]`;
+        document.getElementById('mentorshipEmailBody').value = emailBody;
+        
+        document.getElementById('mentorshipForm').style.display = 'block';
+        document.getElementById('mentorshipSuccess').style.display = 'none';
+        showModal('mentorshipModal');
+    }
+
+    function submitMentorshipForm() {
+        document.getElementById('mentorshipForm').style.display = 'none';
+        document.getElementById('mentorshipSuccess').style.display = 'block';
+        setTimeout(() => hideModal('mentorshipModal'), 2000);
+    }
+
+    // --- Upskilling Action ---
+    function showUpskillingModal() {
+        document.getElementById('upskillingForm').style.display = 'block';
+        document.getElementById('upskillingSuccess').style.display = 'none';
+        showModal('upskillingModal');
+    }
+
+    function submitUpskillingForm() {
+        const employeeName = document.getElementById('upskillEmployeeName').value;
+        const courseName = document.getElementById('upskillCourseName').value;
+
+        document.getElementById('upskillingSuccessText').textContent = `Nomination for ${employeeName} for the course "${courseName}" has been sent to the L&D department.`;
+        document.getElementById('upskillingForm').style.display = 'none';
+        document.getElementById('upskillingSuccess').style.display = 'block';
+        setTimeout(() => hideModal('upskillingModal'), 2500);
+    }
+
+    // --- Flex Work Action ---
+    function showFlexWorkModal() {
+        document.getElementById('flexWorkForm').style.display = 'block';
+        document.getElementById('flexWorkSuccess').style.display = 'none';
+        showModal('flexWorkModal');
+    }
+
+    function submitFlexWorkForm() {
+        const employeeName = document.getElementById('flexWorkEmployeeName').value;
+
+        document.getElementById('flexWorkSuccessText').textContent = `HR has been notified and will reach out to ${employeeName} to schedule a confidential consultation.`;
+        document.getElementById('flexWorkForm').style.display = 'none';
+        document.getElementById('flexWorkSuccess').style.display = 'block';
+        setTimeout(() => hideModal('flexWorkModal'), 2500);
+    }
+
+    // --- Phased Retirement Action ---
+    function showPhasedRetirementModal() {
+        document.getElementById('phasedRetirementForm').style.display = 'block';
+        document.getElementById('phasedRetirementSuccess').style.display = 'none';
+        showModal('phasedRetirementModal');
+    }
+
+    function submitPhasedRetirementForm() {
+        const employeeName = document.getElementById('phasedEmployeeName').value;
+        document.getElementById('phasedRetirementSuccessText').textContent = `Success! HR will contact you to co-author a Phased Retirement Plan for ${employeeName}.`;
+        
+        document.getElementById('phasedRetirementForm').style.display = 'none';
+        document.getElementById('phasedRetirementSuccess').style.display = 'block';
+        setTimeout(() => hideModal('phasedRetirementModal'), 2500);
+    }
+
+    // --- Knowledge Capture Action ---
+    function showKnowledgeCaptureModal() {
+        document.getElementById('knowledgeCaptureForm').style.display = 'block';
+        document.getElementById('knowledgeCaptureSuccess').style.display = 'none';
+        showModal('knowledgeCaptureModal');
+    }
+
+    function submitKnowledgeCaptureForm() {
+        document.getElementById('knowledgeCaptureForm').style.display = 'none';
+        document.getElementById('knowledgeCaptureSuccess').style.display = 'block';
+        setTimeout(() => hideModal('knowledgeCaptureModal'), 2000);
+    }
+
+    // --- Wellness Check Action ---
+    function showWellnessCheckModal() {
+        document.getElementById('wellnessCheckForm').style.display = 'block';
+        document.getElementById('wellnessCheckSuccess').style.display = 'none';
+        showModal('wellnessCheckModal');
+    }
+    
+    function submitWellnessCheckForm() {
+        const employeeName = document.getElementById('wellnessEmployeeName').value;
+        document.getElementById('wellnessCheckSuccessText').textContent = `Request sent. The Wellness team will confidentially reach out to ${employeeName} to offer support and resources.`;
+
+        document.getElementById('wellnessCheckForm').style.display = 'none';
+        document.getElementById('wellnessCheckSuccess').style.display = 'block';
+        setTimeout(() => hideModal('wellnessCheckModal'), 2500);
+    }
+
+    // END of Power BI-compatible functions
+
+    function getEmployeeCount() {
+        const customInput = document.getElementById('customEmployeesInput');
+        const customValue = parseInt(customInput.value, 10);
+
+        if (!isNaN(customValue) && customValue > 0) {
+            return customValue.toString();
+        } else {
+            const selectedButton = document.getElementById('employeesGrid').querySelector('.option-button.selected');
+            return selectedButton ? selectedButton.dataset.value : null;
+        }
+    }
+
+    function getEmployeeSizeMultiplier(employeeCountStr) {
+        if (!employeeCountStr) return 1;
+        const count = employeeCountStr.toLowerCase().includes('+') ? 1000 : parseInt(employeeCountStr, 10);
+        const keys = Object.keys(EMPLOYEE_SIZE_MULTIPLIERS).map(Number).sort((a, b) => a - b);
+        
+        let applicableKey = keys[0];
+        for (const key of keys) {
+            if (count >= key) {
+                applicableKey = key;
+            } else {
+                break;
+            }
+        }
+        return EMPLOYEE_SIZE_MULTIPLIERS[applicableKey];
+    }
+
+
+    function analyzeBusinessRisk() {
+        const selectedAge = parseInt(document.getElementById('averageAgeInput').value);
+        const selectedIndustry = getSelectedValue('industryGrid');
+        const selectedEmployeesStr = getEmployeeCount();
+        
+        if (!selectedEmployeesStr || isNaN(parseInt(selectedEmployeesStr))) {
+            document.querySelector('#analysisNeededModal h2').textContent = 'Invalid Input';
+            document.querySelector('#analysisNeededModal p').textContent = 'Please select or enter a valid number of employees.';
+            showModal('analysisNeededModal');
+            return;
+        }
+
+        const totalEmployees = selectedEmployeesStr.includes('+') ? 1000 : parseInt(selectedEmployeesStr);
+        
+        if (isNaN(selectedAge) || selectedAge < 35 || selectedAge > 50) {
+            document.querySelector('#analysisNeededModal h2').textContent = 'Invalid Input';
+            document.querySelector('#analysisNeededModal p').textContent = 'Please enter a valid average age between 35 and 50.';
+            showModal('analysisNeededModal');
+            return;
+        }
+
+        const industryMultiplier = INDUSTRY_RISK_MULTIPLIERS[selectedIndustry];
+        const ageMultiplier = AGE_RISK_MULTIPLIERS[selectedAge];
+        const employeeSizeMultiplier = getEmployeeSizeMultiplier(selectedEmployeesStr);
+        const retiringEmployees = Math.round(totalEmployees * (selectedAge / 100) * 0.5);
+        const criticalSkillsAtRisk = Math.round(retiringEmployees * (industryMultiplier * 0.1));
+        const totalReplacementCost = retiringEmployees * BASE_REPLACEMENT_COST_PER_EMPLOYEE;
+        const totalRetentionInvestment = totalReplacementCost * RETAIN_COST_MULTIPLIER;
+        const netSavings = totalReplacementCost - totalRetentionInvestment;
+        const roiPercentage = (netSavings > 0 && totalRetentionInvestment > 0) ? (netSavings / totalRetentionInvestment) * 100 : 0;
+        const riskScore = (industryMultiplier * 0.5) + (ageMultiplier * 0.3) + (employeeSizeMultiplier * 0.2);
+        let riskLevel = 'LOW';
+        if (riskScore > 4) riskLevel = 'CRITICAL';
+        else if (riskScore > 3) riskLevel = 'HIGH';
+        else if (riskScore > 2) riskLevel = 'MODERATE';
+        
+        const inputs = {
+            industry: selectedIndustry,
+            averageAge: selectedAge,
+            totalEmployees: totalEmployees
+        };
+
+        const results = {
+            riskLevel: riskLevel,
+            retiringEmployees: retiringEmployees,
+            criticalSkills: criticalSkillsAtRisk,
+            replacementCost: `RM ${formatNumber(totalReplacementCost)}`,
+            retentionInvestment: `RM ${formatNumber(totalRetentionInvestment)}`,
+            netSavings: `RM ${formatNumber(netSavings)}`,
+            roi: `${Math.round(roiPercentage)}%`
+        };
+
+        currentAnalysisResults = { inputs, results };
+
+        updateDashboard(riskLevel, criticalSkillsAtRisk, retiringEmployees, totalReplacementCost);
+        updateRoiAnalysis(totalReplacementCost, totalRetentionInvestment, netSavings, roiPercentage);
+        
+        const alertBanner = document.getElementById('alertBanner');
+        if (riskLevel === 'HIGH' || riskLevel === 'CRITICAL') {
+            document.getElementById('alertText').textContent = `A ${riskLevel.toLowerCase()} risk level indicates high exposure to talent loss. Immediate action is recommended.`;
+            alertBanner.classList.add('show');
+        } else {
+            alertBanner.classList.remove('show');
+        }
+
+        document.getElementById('resultsContainer').classList.add('show');
+        document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+        addMessage(`Analysis complete. Your baseline risk is ${riskLevel}. Now, use the "Strategy Sandbox" below to model solutions and see their financial impact.`, 'system');
+    }
+
+    function runSimulation() {
+        // First, check if a baseline analysis has been run.
+        if (Object.keys(currentAnalysisResults).length === 0) { 
+            document.querySelector('#analysisNeededModal h2').textContent = 'Analysis Required';
+            document.querySelector('#analysisNeededModal p').textContent = "Please run the 'Analyze Business Risk' in Step 1 before simulating a strategy.";
+            showModal('analysisNeededModal'); 
+            return; 
+        }
+
+        // Get the user's strategy inputs from the sliders and buttons.
+        const investmentIncrease = parseInt(document.getElementById('investmentSlider').value) / 100;
+        const ktProgram = getSelectedValue('ktProgramGrid');
+        const ktMultipliers = { none: 1.0, basic: 0.9, advanced: 0.75 };
+        const ktMultiplier = ktMultipliers[ktProgram];
+        
+        // Get the original results from the first analysis.
+        const base = currentAnalysisResults.results; 
+        const baseInputs = currentAnalysisResults.inputs; 
+
+        // NEW: Check if user hasn't made any changes
+        if (investmentIncrease === 0 && ktProgram === 'none') {
+            document.getElementById('projectedRisk').innerHTML = `${base.riskLevel} <span class="change-indicator neutral">No changes made</span>`;
+            document.getElementById('projectedCost').innerHTML = `${base.replacementCost}<span class="change-indicator neutral">(No investment)</span>`;
+            const baseRetention = 100 - (base.retiringEmployees / baseInputs.totalEmployees * 100);
+            document.getElementById('projectedRetention').innerHTML = `${baseRetention.toFixed(1)}%<span class="change-indicator neutral">(No change)</span>`;
+            document.getElementById('projectedROI').innerHTML = `N/A<span class="change-indicator neutral">No new investment to calculate ROI</span>`;
+            document.getElementById('sandboxResults').classList.add('show');
+            return;
+        }
+
+        // --- Start of Calculations ---
+
+        // 1. Calculate new Risk Level
+        const baseRiskScore = {"CRITICAL": 5, "HIGH": 4, "MODERATE": 3, "LOW": 2, "MINIMAL": 1}[base.riskLevel] || 3;
+        const projectedRiskScore = baseRiskScore * (1 - investmentIncrease * 0.25) * ktMultiplier;
+        let projectedRiskLevel = 'LOW';
+        if (projectedRiskScore > 4) projectedRiskLevel = 'CRITICAL';
+        else if (projectedRiskScore > 3) projectedRiskLevel = 'HIGH';
+        else if (projectedRiskScore > 2) projectedRiskLevel = 'MODERATE';
+        
+        // 2. FIXED: Better parsing for Replacement Cost
+        const baseReplacementCostStr = base.replacementCost.replace('RM', '').trim();
+        let baseReplacementCost;
+        if (baseReplacementCostStr.includes('M')) {
+            baseReplacementCost = parseFloat(baseReplacementCostStr.replace('M', '')) * 1000000;
+        } else if (baseReplacementCostStr.includes('K')) {
+            baseReplacementCost = parseFloat(baseReplacementCostStr.replace('K', '')) * 1000;
+        } else {
+            baseReplacementCost = parseFloat(baseReplacementCostStr.replace(/,/g, ''));
+        }
+        
+        const projectedReplacementCost = baseReplacementCost * (1 - investmentIncrease * 0.5) * ktMultiplier;
+
+        // 3. Calculate new Retention Rate
+        const baseRetentionRate = 100 - (base.retiringEmployees / baseInputs.totalEmployees * 100);
+        const retentionBoost = (investmentIncrease * 15) + (ktProgram === 'none' ? 0 : ktProgram === 'basic' ? 2 : 5);
+        const projectedRetentionRate = Math.min(99.5, baseRetentionRate + retentionBoost);
+
+        // 4. FIXED: Better ROI calculation
+        const baseRetentionInvestmentStr = base.retentionInvestment.replace('RM', '').trim();
+        let baseRetentionInvestment;
+        if (baseRetentionInvestmentStr.includes('M')) {
+            baseRetentionInvestment = parseFloat(baseRetentionInvestmentStr.replace('M', '')) * 1000000;
+        } else if (baseRetentionInvestmentStr.includes('K')) {
+            baseRetentionInvestment = parseFloat(baseRetentionInvestmentStr.replace('K', '')) * 1000;
+        } else {
+            baseRetentionInvestment = parseFloat(baseRetentionInvestmentStr.replace(/,/g, ''));
+        }
+        
+        const additionalInvestment = baseRetentionInvestment * investmentIncrease;
+        const ktProgramCost = ktProgram === 'basic' ? 20000 : ktProgram === 'advanced' ? 50000 : 0;
+        const totalNewInvestment = additionalInvestment + ktProgramCost;
+        
+        const costSavings = baseReplacementCost - projectedReplacementCost;
+        const projectedROI = totalNewInvestment > 0 ? (costSavings / totalNewInvestment) * 100 : 0;
+
+        // --- End of Calculations ---
+
+        // Update the user interface with the new, correct numbers.
+        updateSimulationUI({
+            riskLevel: projectedRiskLevel,
+            replacementCost: projectedReplacementCost,
+            retentionRate: projectedRetentionRate,
+            roi: projectedROI,
+            costSavings: costSavings,
+            newInvestment: totalNewInvestment
+        });
+    }
+    
+    function simulateUpdate() {
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const urgentEvent = Math.random();
+        let urgentText = `✅ RESOLVED: All critical succession meetings from last week are complete. No new urgent alerts today.`;
+        if (urgentEvent > 0.8) { urgentText = `🔴 NEW: 1 unexpected departure logged (Senior Engineer). Risk score increased. Immediate succession planning required.`; }
+        else if (urgentEvent > 0.5) { urgentText = `⚠️ Upcoming: ${randomInt(2, 4)} employees approach retirement in the next quarter. Auto-scheduled planning meetings are pending your approval.`; }
+        
+        const budgetEmployees = randomInt(2, 6);
+        const salaryAdjustment = (budgetEmployees * randomInt(6, 10) * 1000).toLocaleString();
+        const replacementCost = (budgetEmployees * 45000).toLocaleString();
+        let budgetText = `💰 ${budgetEmployees} critical employees are now paid >15% below market rate. Recommended action: RM ${salaryAdjustment} adjustment vs. potential RM ${replacementCost} replacement cost.`;
+        
+        const incompletePlans = randomInt(1, 5);
+        let actionText = `📋 Progress: ${5 - incompletePlans} of 5 critical succession plans were updated this week. ${incompletePlans} remain. ISO audit deadline is in ${randomInt(30, 60)} days.`;
+
+        document.getElementById('modalUrgentAlerts').textContent = urgentText;
+        document.getElementById('modalBudgetAlerts').textContent = budgetText;
+        document.getElementById('modalActionAlerts').textContent = actionText;
+        
+        const cards = document.querySelectorAll('.tracker-card');
+        cards.forEach(card => {
+            card.style.animation = 'none';
+            card.offsetHeight;
+            card.style.animation = 'messageSlide 0.5s ease';
+        });
+    }
+
+    function showDailyDashboard() { simulateUpdate(); document.getElementById('dailyDashboardModal').classList.add('show'); }
+    function showQuickActions() { document.getElementById('quickActionsModal').classList.add('show'); }
+    function showEmailSetup() { document.getElementById('emailSetupModal').classList.add('show'); }
+    function saveEmailSettings() {
+        const email = document.getElementById('alertEmail').value;
+        if (!email || !email.includes('@')) {
+            document.querySelector('#analysisNeededModal h2').textContent = 'Invalid Email';
+            document.querySelector('#analysisNeededModal p').textContent = 'Please enter a valid email address.';
+            showModal('analysisNeededModal');
+            return;
+        }
+        hideModal('emailSetupModal');
+        document.querySelector('#analysisNeededModal h2').textContent = 'Success!';
+        document.querySelector('#analysisNeededModal p').textContent = `Email alerts activated! You'll receive updates at ${email}.`;
+        showModal('analysisNeededModal');
+    }
+    
+    function updateSimulationUI(projections) {
+        const resultsPanel = document.getElementById('sandboxResults');
+        const base = currentAnalysisResults.results;
+        const baseInputs = currentAnalysisResults.inputs;
+        
+        // Risk Level with proper change indication
+        const riskLevels = { "CRITICAL": 4, "HIGH": 3, "MODERATE": 2, "LOW": 1 };
+        const oldRiskVal = riskLevels[base.riskLevel];
+        const newRiskVal = riskLevels[projections.riskLevel];
+        const riskChange = newRiskVal < oldRiskVal ? 'positive' : newRiskVal > oldRiskVal ? 'negative' : 'neutral';
+        const riskChangeText = newRiskVal < oldRiskVal ? 'Improved!' : newRiskVal > oldRiskVal ? 'Worsened' : 'No change';
+        document.getElementById('projectedRisk').innerHTML = `${projections.riskLevel} <span class="change-indicator ${riskChange}">${riskChangeText}</span>`;
+        
+        // Replacement Cost with savings
+        document.getElementById('projectedCost').innerHTML = `RM ${formatNumber(projections.replacementCost)}<span class="change-indicator positive">(Saved ~RM ${formatNumber(Math.abs(projections.costSavings))})</span>`;
+        
+        // Retention Rate
+        const baseRetention = 100 - (base.retiringEmployees / baseInputs.totalEmployees * 100);
+        const retentionChange = projections.retentionRate - baseRetention;
+        document.getElementById('projectedRetention').innerHTML = `${projections.retentionRate.toFixed(1)}%<span class="change-indicator positive">(+${retentionChange.toFixed(1)}%)</span>`;
+        
+        // ROI with clear explanation
+        document.getElementById('projectedROI').innerHTML = `${Math.round(projections.roi)}%<span class="change-indicator positive">ROI (Saved RM ${formatNumber(projections.costSavings)} with RM ${formatNumber(projections.newInvestment)} investment)</span>`;
+        
+        resultsPanel.classList.add('show');
+    }
+
+    function updateDashboard(riskLevel, criticalSkills, retiringEmployees, replacementCost) {
+        document.getElementById('riskLevel').textContent = riskLevel;
+        document.getElementById('criticalSkills').textContent = criticalSkills;
+        document.getElementById('retiringEmployees').textContent = retiringEmployees;
+        document.getElementById('replacementCost').textContent = `RM ${formatNumber(replacementCost)}`;
+    }
+    
+    function updateRoiAnalysis(replaceCost, retainCost, savings, roi) {
+        document.getElementById('replaceRecruitment').textContent = `RM ${formatNumber(replaceCost * 0.30)}`;
+        document.getElementById('replaceTraining').textContent = `RM ${formatNumber(replaceCost * 0.45)}`;
+        document.getElementById('replaceProductivity').textContent = `RM ${formatNumber(replaceCost * 0.25)}`;
+        document.getElementById('replaceTotal').textContent = `RM ${formatNumber(replaceCost)}`;
+        document.getElementById('retainTraining').textContent = `RM ${formatNumber(retainCost * 0.50)}`;
+        document.getElementById('retainPrograms').textContent = `RM ${formatNumber(retainCost * 0.30)}`;
+        document.getElementById('retainTools').textContent = `RM ${formatNumber(retainCost * 0.20)}`;
+        document.getElementById('retainTotal').textContent = `RM ${formatNumber(retainCost)}`;
+        document.getElementById('netSavings').textContent = `RM ${formatNumber(savings)}`;
+        document.getElementById('roiPercentage').textContent = `${Math.round(roi)}% ROI on Retention Investment`;
+    }
+
+    function showMethodology() { 
+        document.getElementById('methodologyOutput').innerHTML = getMethodologyText();
+        document.getElementById('methodologyModal').classList.add('show'); 
+    }
+    function showReportModal() { document.getElementById('reportOutput').textContent = generateReport(); document.getElementById('reportModal').classList.add('show'); }
+    function hideModal(modalId) { document.getElementById(modalId).classList.remove('show'); }
+    function resetTool() { window.location.reload(); }
+    
+    function addMessage(text, type) {
+        const messagesDiv = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble';
+        bubbleDiv.textContent = text;
+        messageDiv.appendChild(bubbleDiv);
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendChatBtn');
+        const message = input.value.trim();
+        if (!message) return;
+        addMessage(message, 'user');
+        input.value = '';
+        sendBtn.disabled = true;
+        addMessage('Analyzing your query...', 'assistant');
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message, context: currentAnalysisResults })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Network response was not ok.");
+            }
+            const data = await response.json();
+            const messagesDiv = document.getElementById('chatMessages');
+            messagesDiv.removeChild(messagesDiv.lastChild);
+            addMessage(data.response || 'Sorry, I encountered an issue.', 'assistant');
+        } catch (error) {
+            console.error("Chat Error:", error);
+            const messagesDiv = document.getElementById('chatMessages');
+            if (messagesDiv.lastChild) {
+                messagesDiv.removeChild(messagesDiv.lastChild);
+            }
+            addMessage(`Error: ${error.message}. Please check the console for details.`, 'system');
+        } finally {
+            sendBtn.disabled = false;
+        }
+    }
+
+    function downloadReport() {
+        const reportText = generateReport();
+        const blob = new Blob([reportText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Workforce_Risk_Report_${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    
+    function copyReportToClipboard() {
+        const reportText = generateReport();
+        navigator.clipboard.writeText(reportText).then(() => {
+            const copyBtn = document.getElementById('copyReportBtn');
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '✅ Copied!';
+            copyBtn.style.background = '#27ae60';
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+                copyBtn.style.background = '#3498db';
+            }, 2000);
+        }).catch(err => {
+            alert('Failed to copy report. Please try downloading instead.');
+            console.error('Copy failed:', err);
+        });
+    }
+    
+    function getSelectedValue(gridId) { return document.getElementById(gridId).querySelector('.option-button.selected')?.dataset.value; }
+    function formatNumber(num) { 
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+            return (num / 1000).toFixed(0) + 'K';
+        } else {
+            return Math.round(num).toLocaleString('en-US');
+        }
+    }
+    
+    function getMethodologyText() {
+        return `
+            <div class="methodology-section">
+                <h3>📊 STEP 1: BASELINE RISK ASSESSMENT</h3>
+                <p>The initial analysis establishes your organization's baseline risk profile.</p>
+            </div>
+
+            <div class="methodology-section">
+                <h3>1. Risk Score Calculation</h3>
+                <p>A composite Risk Score is calculated to determine the overall risk level based on three key factors:</p>
+                <ul>
+                    <li><strong>Formula:</strong> (Industry Multiplier × 0.5) + (Age Multiplier × 0.3) + (Employee Size Multiplier × 0.2)</li>
+                    <li><strong>Industry Multiplier:</strong> Manufacturing (4), Healthcare (4), Technology (5), Construction (3), Services (2), Finance (1)</li>
+                    <li><strong>Age Multiplier:</strong> Ranges from 1 (age 35-36) to 5 (age 47-50)</li>
+                    <li><strong>Employee Size Multiplier:</strong> Ranges from 1 (50 employees) to 5 (1000+ employees)</li>
+                    <li><strong>Risk Levels:</strong> LOW (&lt;2), MODERATE (2-3), HIGH (3-4), CRITICAL (&gt;4)</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>2. Employees Retiring Soon (5-Year Window)</h3>
+                <p>This estimates the number of employees likely to retire within the next 5 years.</p>
+                <ul>
+                    <li><strong>Formula:</strong> Total Employees × (Average Age / 100) × 0.5</li>
+                    <li><strong>Rationale:</strong> Assumes a linear correlation between average workforce age and retirement probability over a 5-year period</li>
+                    <li><strong>Example:</strong> 100 employees with average age 45 → 100 × (45/100) × 0.5 = 23 retiring employees</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>3. Critical Skills at Risk</h3>
+                <p>Estimates how many retiring employees hold business-critical roles that would severely impact operations.</p>
+                <ul>
+                    <li><strong>Formula:</strong> Employees Retiring Soon × (Industry Risk Multiplier × 0.1)</li>
+                    <li><strong>Rationale:</strong> Industries with higher technical complexity have more roles with specialized, hard-to-replace knowledge</li>
+                    <li><strong>Example:</strong> Technology sector with 23 retiring → 23 × (5 × 0.1) = 12 critical roles at risk</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>4. Replacement Cost Estimation</h3>
+                <p>The total estimated financial impact of replacing all retiring employees through external hiring.</p>
+                <ul>
+                    <li><strong>Base Cost per Employee:</strong> RM 15,000</li>
+                    <li><strong>Cost Components:</strong> Recruitment (30%), Onboarding & Training (45%), Lost Productivity (25%)</li>
+                    <li><strong>Formula:</strong> Employees Retiring Soon × RM 15,000</li>
+                    <li><strong>Source:</strong> Based on industry studies showing replacement costs average 50-200% of annual salary; we use a conservative mid-range estimate</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>5. Retention Investment (Proactive Strategy)</h3>
+                <p>The estimated cost to implement a proactive retention strategy instead of replacing departing employees.</p>
+                <ul>
+                    <li><strong>Base Investment:</strong> 20% of the Total Replacement Cost</li>
+                    <li><strong>Formula:</strong> Total Replacement Cost × 0.20</li>
+                    <li><strong>Investment Includes:</strong> Upskilling programs (50%), Phased retirement programs (30%), Knowledge transfer tools (20%)</li>
+                    <li><strong>Rationale:</strong> Research shows retention initiatives cost 15-25% of replacement costs while delivering 80-90% effectiveness</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>6. Baseline ROI Calculation</h3>
+                <p>Return on Investment comparing the proactive retention strategy to reactive replacement.</p>
+                <ul>
+                    <li><strong>Formula:</strong> ((Total Replacement Cost - Total Retention Investment) / Total Retention Investment) × 100</li>
+                    <li><strong>Example:</strong> RM 345K replacement vs RM 69K retention → ((345K - 69K) / 69K) × 100 = 400% ROI</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>🔬 STEP 2: STRATEGY SIMULATION MODEL</h3>
+                <p>This advanced model allows you to test different retention strategies and see their projected financial and operational impact.</p>
+            </div>
+
+            <div class="methodology-section">
+                <h3>7. Investment Slider Impact (0-100%)</h3>
+                <p>Simulates increasing your retention and upskilling budget above the baseline 20%.</p>
+                <ul>
+                    <li><strong>Risk Reduction:</strong> Base Risk Score × (1 - Investment % × 0.25) × KT Multiplier</li>
+                    <li><strong>Cost Reduction:</strong> Base Replacement Cost × (1 - Investment % × 0.5) × KT Multiplier</li>
+                    <li><strong>Retention Boost:</strong> Base Retention Rate + (Investment % × 15%)</li>
+                    <li><strong>Example at 50%:</strong> A 50% investment increase reduces risk by 12.5% and replacement costs by 25%</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>8. Knowledge Transfer (KT) Program Impact</h3>
+                <p>Three tiers of structured knowledge preservation programs, each with different cost-benefit profiles.</p>
+                <ul>
+                    <li><strong>None (Default):</strong> No formal program. KT Multiplier = 1.0, No additional cost, +0% retention boost</li>
+                    <li><strong>Basic (RM 20,000):</strong> Mentorship, exit interviews, documentation checklists. KT Multiplier = 0.9 (10% reduction), +2% retention boost</li>
+                    <li><strong>Advanced (RM 50,000):</strong> Job shadowing, digital knowledge bases, paid knowledge transfer periods. KT Multiplier = 0.75 (25% reduction), +5% retention boost</li>
+                    <li><strong>Rationale:</strong> Formal KT programs reduce the impact of departures by preserving institutional knowledge even when employees leave</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>9. Simulation ROI Calculation</h3>
+                <p>Calculates the return on your simulated strategy, accounting for all investments.</p>
+                <ul>
+                    <li><strong>Total New Investment:</strong> (Base Retention Investment × Investment %) + KT Program Cost</li>
+                    <li><strong>Cost Savings:</strong> Base Replacement Cost - Projected Replacement Cost</li>
+                    <li><strong>Simulation ROI:</strong> (Cost Savings / Total New Investment) × 100</li>
+                    <li><strong>Example:</strong> 25% investment + Basic KT → Total Investment: RM 225K, Savings: RM 86K → ROI: 38%</li>
+                    <li><strong>Special Case:</strong> When Investment = 0% and KT = None, ROI displays as "N/A" since no new investment is made</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>10. Number Formatting</h3>
+                <p>All financial figures are formatted for clarity:</p>
+                <ul>
+                    <li><strong>Millions:</strong> Values ≥ 1,000,000 display as "1.5M"</li>
+                    <li><strong>Thousands:</strong> Values ≥ 1,000 display as "150K"</li>
+                    <li><strong>Hundreds:</strong> Values &lt; 1,000 display as "500"</li>
+                </ul>
+            </div>
+
+            <div class="methodology-section">
+                <h3>📚 Sources & References</h3>
+                <p>This methodology is based on:</p>
+                <ul>
+                    <li>Society for Human Resource Management (SHRM) research on replacement costs</li>
+                    <li>Harvard Business Review studies on knowledge management effectiveness</li>
+                    <li>Industry benchmarks for retention program ROI</li>
+                    <li>Actuarial data on workforce retirement patterns</li>
+                </ul>
+                <p class="methodology-source"><strong>Disclaimer:</strong> This tool provides estimates for strategic planning purposes. Actual costs and outcomes may vary based on your specific organizational context, labor market conditions, and implementation quality.</p>
+            </div>
+        `;
+    }
+
+    function generateReport() {
+        let report = `
+WORKFORCE CONTINUITY RISK & ROI REPORT
+=======================================
+Generated: ${new Date().toLocaleString()}
+
+ASSESSMENT INPUTS:
+------------------
+- Industry: ${getSelectedValue('industryGrid')}
+- Average Age: ${document.getElementById('averageAgeInput').value}
+- Total Employees: ${getEmployeeCount()}
+
+KEY RISK METRICS (BASELINE):
+-----------------
+- Risk Level: ${currentAnalysisResults.results.riskLevel}
+- Critical Skills at Risk: ${currentAnalysisResults.results.criticalSkills}
+- Employees Retiring Soon: ${currentAnalysisResults.results.retiringEmployees}
+- Est. Total Replacement Cost: ${currentAnalysisResults.results.replacementCost}
+
+COST-BENEFIT ANALYSIS (RETENTION vs. REPLACEMENT):
+--------------------------------------------------
+1. REPLACEMENT COST (Current Approach):
+   - Recruitment: ${document.getElementById('replaceRecruitment').textContent}
+   - Onboarding & Training: ${document.getElementById('replaceTraining').textContent}
+   - Lost Productivity: ${document.getElementById('replaceProductivity').textContent}
+   - TOTAL: ${document.getElementById('replaceTotal').textContent}
+
+2. RETENTION INVESTMENT (Proactive Approach):
+   - Upskilling & Training: ${document.getElementById('retainTraining').textContent}
+   - Phased Retirement Programs: ${document.getElementById('retainPrograms').textContent}
+   - Knowledge Transfer Tools: ${document.getElementById('retainTools').textContent}
+   - TOTAL: ${document.getElementById('retainTotal').textContent}
+
+FINANCIAL OUTCOME (BASELINE):
+------------------
+- Potential Net Savings: ${document.getElementById('netSavings').textContent}
+- Return on Investment (ROI): ${document.getElementById('roiPercentage').textContent}
+`;
+
+        const projectedRiskEl = document.getElementById('projectedRisk');
+        if (projectedRiskEl.textContent !== '--') {
+            report += `
+
+STRATEGY SIMULATION RESULTS:
+----------------------------
+- Investment Increase: ${document.getElementById('investmentValue').textContent}
+- Knowledge Transfer Program: ${getSelectedValue('ktProgramGrid')}
+
+PROJECTED OUTCOMES:
+- Projected Risk Level: ${projectedRiskEl.innerText.replace(/\s+/g, ' ')}
+- Projected Replacement Cost: ${document.getElementById('projectedCost').innerText.replace(/\s+/g, ' ')}
+- Projected Employee Retention: ${document.getElementById('projectedRetention').innerText.replace(/\s+/g, ' ')}
+- Projected ROI on New Investment: ${document.getElementById('projectedROI').innerText.replace(/\s+/g, ' ')}
+`;
+        }
+
+        report += `
+
+RECOMMENDED ACTIONS:
+--------------------
+1. Define Critical Roles: Identify roles where knowledge loss would critically impact revenue or operations.
+2. Launch Succession Plan: For each critical role, identify and develop high-potential employees as successors.
+3. Automate Risk Alerts: Set up system alerts for key events like retirement announcements to enable proactive management.
+
+DISCLAIMER:
+-----------
+This report provides estimates based on a proprietary risk model and industry benchmarks. Actual results may vary. It is intended for strategic planning and informational purposes.
+`;
+        return report;
+    }
+
+    function getCannedResponse(message) {
+        const lowerCaseMessage = message.toLowerCase();
+        if (lowerCaseMessage.includes("risk level")) { return `Your current risk level is "${currentAnalysisResults.results.riskLevel}". A high level signifies a significant probability of losing critical talent and knowledge in the next 5 years due to retirement, which could impact operations and innovation. I recommend focusing on knowledge transfer programs immediately.`; }
+        if (lowerCaseMessage.includes("cost") || lowerCaseMessage.includes("replace")) { return `The estimated total cost to replace all at-risk employees is ${currentAnalysisResults.results.replacementCost}. This includes recruitment, onboarding, training, and lost productivity during the ramp-up period for new hires. Investing in retention is often more cost-effective.`; }
+        if (lowerCaseMessage.includes("roi") || lowerCaseMessage.includes("strategies")) { return `Proactive retention strategies show a potential ${currentAnalysisResults.results.roi}. The most effective strategies are typically Knowledge Transfer Programs, due to their high impact and low cost, and Phased Retirement Options, which retain valuable expertise within the company longer.`; }
+        if (lowerCaseMessage.includes("knowledge transfer")) { return "To implement a knowledge transfer program, start by identifying your most critical senior roles. Then, create a structured mentorship plan pairing them with high-potential mid-career employees. Use job shadowing, documented procedures (wikis), and exit interviews to capture as much tacit knowledge as possible."; }
+        if (lowerCaseMessage.includes("measure") || lowerCaseMessage.includes("metrics") || lowerCaseMessage.includes("success")) { return "Key success metrics to track monthly: 1) Percentage of critical roles with documented succession plans, 2) Retention rate of employees over 50, 3) Time-to-productivity for new hires in critical roles, and 4) Month-over-month risk score improvement."; }
+        return "I can help you understand your risk level, the financial impact of employee turnover, and the best strategies to retain your critical talent. Please ask a specific question about your results.";
+    }
+    
+</script>
+</body>
+</html>
