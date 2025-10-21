@@ -354,48 +354,6 @@ See [METHODOLOGY.md](docs/METHODOLOGY.md) for complete technical details.
 
 Contributions are welcome! Here's how you can help:
 
-### Ways to Contribute
-- 🐛 Report bugs or issues
-- 💡 Suggest new features
-- 📝 Improve documentation
-- 🌍 Add internationalization support
-- 🎨 Enhance UI/UX design
-- 🧪 Add test coverage
-
-### Contribution Process
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow existing code style
-- Add comments for complex logic
-- Test thoroughly before submitting
-- Update documentation as needed
-
-## 📈 Roadmap
-
-### Version 2.0 (Q2 2025)
-- [ ] Multi-language support (Malay, Chinese, Tamil)
-- [ ] Integration with HRIS systems (SAP, Workday)
-- [ ] Advanced analytics dashboard
-- [ ] Mobile app (iOS & Android)
-- [ ] Team collaboration features
-
-### Version 3.0 (Q4 2025)
-- [ ] Predictive analytics using ML
-- [ ] Industry-specific templates
-- [ ] Automated succession planning
-- [ ] Compliance reporting (ISO, SOC2)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 **What this means:**
 - ✅ Commercial use allowed
 - ✅ Modification allowed
@@ -424,16 +382,6 @@ Your Name
 ## 🌟 Star History
 
 If you find this tool helpful, please consider giving it a star! ⭐
-
----
-
-## 🚨 Support & Issues
-
-**Found a bug?** [Open an issue](https://github.com/yourusername/hr-workforce-risk-tool/issues)
-
-**Need help?** Check our [Discussions](https://github.com/yourusername/hr-workforce-risk-tool/discussions)
-
-**Want updates?** Watch this repository for notifications
 
 ---
 
